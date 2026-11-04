@@ -14,7 +14,7 @@ Suppose your instance is running and has a public IP address, but `ssh` cannot c
 
 **Your answer:** Which path did you take in the console (service → page → tab)?
 
-...
+EC2 → Network & Security → Security Groups → select the instance's security group → Inbound rules tab
 
 ## 2. Lambda: why didn't my function run?
 
@@ -26,7 +26,7 @@ Suppose you uploaded a new book to your bucket, but several minutes later MongoD
 
 **Your answer:** Which path did you take in the console (service → page → tab)?
 
-...
+Lambda → Functions → `book-analyzer-dev-analyze_new_book` → Configuration tab → Triggers
 
 ## 3. Lambda: where do I find the error?
 
@@ -38,7 +38,7 @@ Suppose the function did start, but MongoDB still has no document for the book. 
 
 **Your answer:** Which path did you take in the console (service → page → tab)?
 
-...
+Lambda → Functions → `book-analyzer-dev-analyze_new_book` → Monitor tab → View CloudWatch logs → newest log stream with the `pg74.txt: ... words` line
 
 ## 4. EC2 or Lambda: a backlog or new uploads?
 
@@ -52,6 +52,8 @@ For comparison, typical times in this lab:
 - **EC2** (`t3.micro`): about 20 seconds for all 100 books, plus a few minutes to start the instance and run the bootstrap. The instance costs money for every minute it runs, also while it waits.
 - **Lambda** (512 MB): about 2 seconds for one book, including about 1 second to start the function the first time (a cold start). The function runs, and costs, only while a book is analyzed.
 
-**Your answer:**
+**Your answer:** Case A, a backlog: EC2. This is a one-time batch job, and at about 0.2 seconds per book, EC2 would finish all 5,000 in about 17 minutes, plus a few minutes of setup, and I can terminate the instance afterward. Lambda would also take about 2.8 hours if the books ran one at a time, and because they are already in the bucket, they wouldn’t trigger the upload event anyway.
+
+Case B, new uploads: Lambda. Uploads are rare and come at random times, so an S3 trigger can start the function only when a book arrives, and it finishes in about 2 seconds, well within the one-minute goal. An EC2 instance would have to run all day to respond that quickly, costing money while sitting idle.
 
 ...
